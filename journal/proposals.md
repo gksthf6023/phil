@@ -3814,3 +3814,31 @@ b05a47dabf33, 9a2944acc280). No reverts of hourly edits. Relaxation fork not
 re-evaluated in full today. Its only new input is b350, an OVV row where
 the veto avoided a CF -$5.00, so the input points away from relaxation:
 NOT MET (20th).
+
+## 2026-10-05 14:2xZ (FULL tick, operator machine, Windows) -- Polymarket APIs geo-blocked + lease.py crash
+
+- **Polymarket gamma AND clob return HTTP 451 (Unavailable For Legal
+  Reasons) from the operator machine (PROPOSED, operator act).** First
+  seen this tick. `core/resolve.py` got 451 on every open ledger and
+  forecast id (5 ledger rows, 158 forecasts; it ran >25 min on 3x
+  retries each). `core/score.py` MTM failed on every clob `/book` call.
+  `core/scan.py` got 451 on all 4 discovery queries -> 0 candidates. No
+  earlier cycles.log line mentions a gamma/clob 451. Previous operator
+  ticks (latest 2026-09-29) read gamma and the CLOB fine, so the
+  machine's egress changed (VPN/proxy off, or a new geo-rule). Nothing on
+  the agent side can fix this and the rules say never scrape around a
+  blocked source. Effect: no settlement, no scan, no quotes, no bets
+  from this runner until egress is restored. Ask: restore the route, or
+  have loop.sh probe `gamma-api.polymarket.com/markets?limit=1` before
+  starting and downgrade to a LIGHT tick (or skip) on 451, so a blocked
+  runner does not spend 25+ min on resolve retries.
+- **`core/lease.py acquire` crashes on this machine (PROPOSED).**
+  `git commit-tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904 -m ...` exited
+  128 and the CalledProcessError went uncaught, so acquire printed a
+  traceback, not JSON. Likely cause: the empty-tree object is not in this
+  clone's object store, which Windows git does not synthesize for
+  commit-tree, or git has no user.name/email set on this machine. Ask:
+  create the tree with `git mktree </dev/null` (or `hash-object -t tree
+  -w`) first, and catch the error into `{"acquired": true, "written":
+  false, "error": ...}`. This tick ran FULL with no lease, the same way
+  it handles written:false.

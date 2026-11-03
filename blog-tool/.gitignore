@@ -1,0 +1,6 @@
+node_modules/
+naver-profile/
+input/photos/_mosaic/
+drafts/*.dump.txt
+drafts/*.png
+logs/

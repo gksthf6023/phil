@@ -1,0 +1,15 @@
+{
+  "name": "naver-blog-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "사진+메모 → Claude Code가 글 작성 → 승인 후 네이버 블로그 임시저장까지 (발행은 사람이)",
+  "scripts": {
+    "login": "node scripts/naver_login.js",
+    "draft": "node scripts/naver_draft.js",
+    "probe": "node scripts/probe_selectors.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0",
+    "sharp": "^0.33.5"
+  }
+}
